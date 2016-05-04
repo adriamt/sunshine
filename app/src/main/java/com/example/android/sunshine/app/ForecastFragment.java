@@ -36,7 +36,7 @@ import java.util.List;
  */
 public class ForecastFragment extends Fragment {
 
-    ArrayAdapter<String> mForecastAdapter;
+    private ArrayAdapter<String> mForecastAdapter;
 
     public ForecastFragment() {
     }
@@ -72,7 +72,7 @@ public class ForecastFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
 
         // Create some dummy data for the ListView.  Here's a sample weekly forecast
         String forecastArray[] = {
@@ -100,15 +100,14 @@ public class ForecastFragment extends Fragment {
                         // Forecast data
                         weekForecast);
 
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+
         ListView listView = (ListView) rootView.findViewById(
                 R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
 
         return rootView;
     }
-
-
-
 
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]>{
 
@@ -202,9 +201,6 @@ public class ForecastFragment extends Fragment {
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
 
-            for (String s : resultStrs) {
-                Log.v(LOG_TAG, "Forecast entry: " + s);
-            }
             return resultStrs;
         }
 
@@ -251,8 +247,6 @@ public class ForecastFragment extends Fragment {
 
                 URL url = new URL(builtUri.toString());
 
-                Log.v(LOG_TAG, "Built Uri: " + builtUri.toString());
-
                 // Create the request to OpenWeatherMap, and open the connection
                 urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
@@ -280,7 +274,6 @@ public class ForecastFragment extends Fragment {
                     return null;
                 }
                 forecastJsonStr = buffer.toString();
-                Log.v(LOG_TAG, "Forecast JSON String: " + forecastJsonStr);
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 // If the code didn't successfully get the weather data, there's no point in attemping
@@ -306,5 +299,17 @@ public class ForecastFragment extends Fragment {
             }
             return null;
         }
+
+        @Override
+        protected void onPostExecute(String[] weatherData) {
+            if (weatherData != null) {
+                mForecastAdapter.clear();
+                for(String dayForecastStr : weatherData) {
+                    mForecastAdapter.add(dayForecastStr);
+                }
+                // New data is back from the server.  Hooray!
+            }
+        }
     }
+
 }
